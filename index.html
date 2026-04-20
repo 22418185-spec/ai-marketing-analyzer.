@@ -39,7 +39,6 @@ body::before {
   to { transform: translateY(-500px); }
 }
 
-/* Full screen */
 .chat-container {
   width: 100vw;
   height: 100vh;
@@ -103,17 +102,11 @@ body::before {
   color: #00e5ff;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.buttons button:hover {
-  background: rgba(0,229,255,0.15);
 }
 
 .buttons button.selected {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
-  transform: scale(1.05);
 }
 </style>
 </head>
@@ -204,28 +197,13 @@ function answer(value, btn) {
   let parent = btn.parentElement;
   let buttons = parent.querySelectorAll("button");
 
-  // تعطيل كل الأزرار
-  buttons.forEach(b => {
-    b.disabled = true;
-    b.classList.remove("selected");
-  });
+  buttons.forEach(b => b.disabled = true);
 
-  // تأثير الضغط
-  btn.classList.add("selected");
-  btn.style.transform = "scale(0.95)";
-
-  setTimeout(() => {
-    btn.style.transform = "scale(1)";
-  }, 150);
-
-  setTimeout(() => {
-    step++;
-    askQuestion();
-  }, 250);
+  step++;
+  askQuestion();
 }
 
 function finish() {
-  let chat = document.getElementById("chat");
 
   let total = answers.reduce((a,b)=>a+b,0);
   let max = answers.length * 3;
@@ -236,6 +214,15 @@ function finish() {
     percent >= 50 ? "تأثير متوسط" :
     "تأثير ضعيف";
 
+  // 🔥 إرسال البيانات إلى Google Sheets
+  fetch("YOUR_GOOGLE_SCRIPT_URL", {
+    method: "POST",
+    body: JSON.stringify({
+      score: percent,
+      answers: answers
+    })
+  });
+
   let msg = document.createElement("div");
   msg.className = "bot";
   msg.innerText =
@@ -244,7 +231,7 @@ function finish() {
     result + "\n\n" +
     "شكراً لمشاركتك.";
 
-  chat.appendChild(msg);
+  document.getElementById("chat").appendChild(msg);
 }
 
 </script>
