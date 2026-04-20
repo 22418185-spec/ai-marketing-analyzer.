@@ -22,23 +22,6 @@ body {
   overflow: hidden;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(white 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: 0.1;
-  animation: stars 60s linear infinite;
-  z-index: -1;
-}
-
-@keyframes stars {
-  from { transform: translateY(0); }
-  to { transform: translateY(-500px); }
-}
-
 .chat-container {
   width: 100vw;
   height: 100vh;
@@ -56,7 +39,6 @@ body::before {
 
 .title-box h1 {
   font-size: 22px;
-  font-weight: 600;
   background: linear-gradient(90deg, #00e5ff, #8a2be2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -67,30 +49,22 @@ body::before {
   color: #ccc;
 }
 
-.line {
-  width: 60%;
-  height: 2px;
-  margin: 8px auto;
-  background: linear-gradient(to right, transparent, #00e5ff, transparent);
-}
-
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
 }
 
 .bot {
   background: rgba(255,255,255,0.08);
   padding: 12px;
   border-radius: 15px;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
 .buttons {
   display: flex;
   gap: 10px;
-  margin: 10px 0;
+  margin-top: 10px;
 }
 
 .buttons button {
@@ -102,11 +76,20 @@ body::before {
   color: #00e5ff;
   font-weight: 600;
   cursor: pointer;
+  transition: 0.2s;
 }
 
+/* ✨ التحديد الواضح جداً */
 .buttons button.selected {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
+  transform: scale(1.08);
+  box-shadow: 0 0 15px rgba(0,229,255,0.6);
+}
+
+.buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
 </head>
@@ -118,7 +101,6 @@ body::before {
   <div class="title-box">
     <h1>استبانة لتحليل تأثير التسويق بالذكاء الاصطناعي</h1>
     <p>على العلامات التجارية الرقمية</p>
-    <div class="line"></div>
   </div>
 
   <div id="chat" class="messages"></div>
@@ -131,76 +113,78 @@ let answers = [];
 let step = 0;
 
 let questions = [
-"تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على التسويق الرقمي.",
-"يساعد الذكاء الاصطناعي في فهم سلوك العملاء بدقة.",
-"الإعلانات بالذكاء الاصطناعي أكثر جذباً.",
-"الثقة بالإعلانات تزيد مع الذكاء الاصطناعي.",
-"الذكاء الاصطناعي يقلل تكلفة التسويق.",
-"استهداف الجمهور يصبح أدق.",
-"الشركات تعتمد على AI بشكل كبير.",
-"AI يحسن تجربة المستخدم.",
-"AI يزيد سرعة اتخاذ القرار.",
-"AI يعزز ولاء العملاء.",
-"التسويق بالذكاء الاصطناعي أكثر فعالية.",
-"AI يساعد في إنشاء محتوى إعلاني.",
-"AI يتوقع اتجاهات السوق.",
-"AI أصبح ضرورة في التسويق.",
-"AI يحسن صورة العلامة التجارية.",
-"AI يقلل الأخطاء.",
-"AI يساعد السوشيال ميديا.",
-"الإعلانات المخصصة أنجح.",
-"AI يزيد التحويل.",
-"AI يزيد الأرباح.",
-"AI يسهل تحليل المنافسين.",
-"AI يحسن التجارة الإلكترونية.",
-"الاعتماد على AI يقلل البشر.",
-"مستقبل التسويق يعتمد على AI.",
-"AI هو الأساس القادم."
+"تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي.",
+"يساعد في فهم العملاء.",
+"الإعلانات أكثر جذباً.",
+"الثقة تزيد.",
+"يقلل التكلفة.",
+"يستهدف الجمهور بدقة.",
+"يعتمد عليه التسويق.",
+"يحسن تجربة المستخدم.",
+"يسرّع القرار.",
+"يعزز الولاء.",
+"فعال جداً.",
+"يساعد المحتوى.",
+"يتوقع السوق.",
+"ضروري الآن.",
+"يحسن العلامة.",
+"يقلل الأخطاء.",
+"يدعم السوشيال ميديا.",
+"الإعلانات المخصصة أفضل.",
+"يزيد التحويل.",
+"يزيد الأرباح.",
+"يساعد التحليل.",
+"يحسن التجارة.",
+"يقلل الاعتماد على البشر.",
+"المستقبل يعتمد عليه.",
+"هو الأساس."
 ];
 
-window.onload = () => {
-  askQuestion();
-};
+window.onload = () => askQuestion();
 
 function askQuestion() {
-  if (step < questions.length) {
 
-    let chat = document.getElementById("chat");
+  if (step >= questions.length) return finish();
 
-    let q = document.createElement("div");
-    q.className = "bot";
-    q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
+  let chat = document.getElementById("chat");
 
-    chat.appendChild(q);
+  let q = document.createElement("div");
+  q.className = "bot";
+  q.innerHTML = "السؤال " + (step+1) + ":<br>" + questions[step];
 
-    let btns = document.createElement("div");
-    btns.className = "buttons";
+  let btns = document.createElement("div");
+  btns.className = "buttons";
 
-    btns.innerHTML = `
-      <button onclick="answer(3,this)">موافق</button>
-      <button onclick="answer(2,this)">محايد</button>
-      <button onclick="answer(1,this)">غير موافق</button>
-    `;
+  btns.innerHTML = `
+    <button onclick="answer(3,this)">موافق</button>
+    <button onclick="answer(2,this)">محايد</button>
+    <button onclick="answer(1,this)">غير موافق</button>
+  `;
 
-    chat.appendChild(btns);
+  chat.appendChild(q);
+  chat.appendChild(btns);
 
-    chat.scrollTop = chat.scrollHeight;
-
-  } else {
-    finish();
-  }
+  chat.scrollTop = chat.scrollHeight;
 }
 
 function answer(value, btn) {
+
   answers.push(value);
 
-  let parent = btn.parentElement;
-  let buttons = parent.querySelectorAll("button");
+  let buttons = btn.parentElement.querySelectorAll("button");
 
-  buttons.forEach(b => b.disabled = true);
+  buttons.forEach(b => {
+    b.disabled = true;
+    b.classList.remove("selected");
+  });
 
-  step++;
-  askQuestion();
+  // ✔ إبراز الزر المختار بشكل واضح جداً
+  btn.classList.add("selected");
+
+  setTimeout(() => {
+    step++;
+    askQuestion();
+  }, 300);
 }
 
 function finish() {
@@ -214,22 +198,12 @@ function finish() {
     percent >= 50 ? "تأثير متوسط" :
     "تأثير ضعيف";
 
-  // 🔥 إرسال البيانات إلى Google Sheets
-  fetch("YOUR_GOOGLE_SCRIPT_URL", {
-    method: "POST",
-    body: JSON.stringify({
-      score: percent,
-      answers: answers
-    })
-  });
-
   let msg = document.createElement("div");
   msg.className = "bot";
   msg.innerText =
-    "تم الانتهاء من الاستبانة.\n\n" +
+    "تم الانتهاء.\n\n" +
     "نسبة التأثير: " + percent + "%\n" +
-    result + "\n\n" +
-    "شكراً لمشاركتك.";
+    result + "\n\nشكراً لمشاركتك.";
 
   document.getElementById("chat").appendChild(msg);
 }
