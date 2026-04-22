@@ -2,7 +2,10 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+
 <title>AI Marketing Analyzer</title>
 
 <style>
@@ -11,7 +14,7 @@ body {
   font-family: 'Cairo', sans-serif;
   color: white;
   background: radial-gradient(circle at top, #0f0c29, #1a1a40, #000);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -32,7 +35,8 @@ body::before {
 }
 
 .chat-container {
-  width: 450px;
+  width: 90%;
+  max-width: 500px;
   margin: 40px auto;
   background: rgba(40,40,40,0.75);
   backdrop-filter: blur(25px);
@@ -66,7 +70,7 @@ body::before {
 }
 
 .messages {
-  height: 350px;
+  height: 60vh;
   overflow-y: auto;
   padding: 10px;
 }
@@ -81,11 +85,13 @@ body::before {
 .buttons {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
   margin: 12px 6px;
 }
 
 .buttons button {
   flex: 1;
+  min-width: 100px;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid rgba(0,229,255,0.3);
@@ -99,25 +105,14 @@ body::before {
 .buttons button:hover {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
-  box-shadow: 0 0 15px #00e5ff;
-  transform: scale(1.05);
 }
 
-/* 🔥 الزر المختار (قوي وواضح جداً) */
 .buttons button.selected {
-  background: #007bff !important;
+  background: #003f7f !important;
   color: white !important;
-  border: 2px solid #00e5ff !important;
-  box-shadow: 0 0 20px #00e5ff, 0 0 35px #007bff;
-  transform: scale(1.12);
-  opacity: 1 !important;
-  filter: brightness(1.3);
-}
-
-/* 🔥 تعطيل بدون ما يضعف اللون */
-.buttons button:disabled {
-  opacity: 1 !important;
-  color: white;
+  border: 2px solid #1e90ff !important;
+  box-shadow: 0 0 12px rgba(30,144,255,0.4);
+  transform: scale(1.06);
 }
 </style>
 </head>
@@ -128,7 +123,7 @@ body::before {
 
 <div class="title-box">
   <h1>AI MARKETING ANALYZER</h1>
-  <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
+  <p>تحليل تأثير الذكاء الاصطناعي على العلامات التجارية الرقمية</p>
   <div class="line"></div>
 </div>
 
@@ -140,6 +135,7 @@ body::before {
 
 let answers = [];
 let step = 0;
+let sent = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -206,44 +202,43 @@ function answer(value, btn) {
 
   let container = btn.parentElement;
 
-  if (container.classList.contains("answered")) return;
-
-  container.classList.add("answered");
-
-  answers.push(value);
-
   let buttons = container.querySelectorAll("button");
 
-  buttons.forEach(b => {
-    b.classList.remove("selected");
-    b.disabled = true;
-  });
+  buttons.forEach(b => b.classList.remove("selected"));
 
   btn.classList.add("selected");
 
-  setTimeout(() => {
-    step++;
-    askQuestion();
+  answers[step] = value;
 
-    let chat = document.getElementById("chat");
-    chat.scrollTop = chat.scrollHeight;
-  }, 400);
+  setTimeout(() => {
+    if (!container.classList.contains("answered")) {
+      container.classList.add("answered");
+      step++;
+      askQuestion();
+    }
+  }, 300);
 }
 
 function finish() {
+
+  if (sent) return;
+  sent = true;
+
   let chat = document.getElementById("chat");
+
+  fetch("https://script.google.com/macros/s/AKfycbxi-xW6rn1gbqVElsIkCwLlZ4SoUw5a_IctzZCunnySK-knVpzwalrT_Hgh1FwA78D8/exec", {
+    method: "POST",
+    body: JSON.stringify({
+      answers: answers
+    })
+  });
 
   let msg = document.createElement("div");
   msg.className = "bot";
-  msg.innerText =
-    "تم الانتهاء من جميع الأسئلة بنجاح.\n\n" +
-    "نشكر لك مشاركتك في هذا الاستبيان، لقد ساهمت في نجاح الدراسة وتحقيق أهدافها.";
+  msg.innerText = "تم الانتهاء من الاستبيان بنجاح، شكراً لمشاركتك.";
 
   chat.appendChild(msg);
-
-  chat.scrollTop = chat.scrollHeight;
 }
-
 </script>
 
 </body>
