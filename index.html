@@ -2,10 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
-
 <title>AI Marketing Analyzer</title>
 
 <style>
@@ -14,57 +11,77 @@ body {
   font-family: 'Cairo', sans-serif;
   color: white;
   background: radial-gradient(circle at top, #0f0c29, #1a1a40, #000);
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(white 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.1;
+  animation: stars 60s linear infinite;
+  z-index: -1;
+}
+
+@keyframes stars {
+  from { transform: translateY(0); }
+  to { transform: translateY(-500px); }
+}
+
 .chat-container {
-  width: 100vw;
-  height: 100vh;
-  background: rgba(20, 20, 35, 0.55);
-  backdrop-filter: blur(15px);
+  width: 450px;
+  margin: 40px auto;
+  background: rgba(40,40,40,0.75);
+  backdrop-filter: blur(25px);
+  border-radius: 25px;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
 }
 
 .title-box {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .title-box h1 {
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: 600;
   background: linear-gradient(90deg, #00e5ff, #8a2be2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .title-box p {
-  font-size: 13px;
+  font-size: 12px;
   color: #ccc;
 }
 
+.line {
+  width: 60%;
+  height: 2px;
+  margin: 8px auto;
+  background: linear-gradient(to right, transparent, #00e5ff, transparent);
+}
+
 .messages {
-  flex: 1;
+  height: 350px;
   overflow-y: auto;
+  padding: 10px;
 }
 
 .bot {
   background: rgba(255,255,255,0.08);
   padding: 12px;
   border-radius: 15px;
-  margin: 8px 0;
+  margin: 6px;
 }
 
 .buttons {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  margin: 12px 6px;
 }
 
 .buttons button {
@@ -76,20 +93,31 @@ body {
   color: #00e5ff;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
-/* ✨ التحديد الواضح جداً */
-.buttons button.selected {
+.buttons button:hover {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
-  transform: scale(1.08);
-  box-shadow: 0 0 15px rgba(0,229,255,0.6);
+  box-shadow: 0 0 15px #00e5ff;
+  transform: scale(1.05);
 }
 
+/* 🔥 الزر المختار (قوي وواضح جداً) */
+.buttons button.selected {
+  background: #007bff !important;
+  color: white !important;
+  border: 2px solid #00e5ff !important;
+  box-shadow: 0 0 20px #00e5ff, 0 0 35px #007bff;
+  transform: scale(1.12);
+  opacity: 1 !important;
+  filter: brightness(1.3);
+}
+
+/* 🔥 تعطيل بدون ما يضعف اللون */
 .buttons button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: 1 !important;
+  color: white;
 }
 </style>
 </head>
@@ -98,12 +126,13 @@ body {
 
 <div class="chat-container">
 
-  <div class="title-box">
-    <h1>استبانة لتحليل تأثير التسويق بالذكاء الاصطناعي</h1>
-    <p>على العلامات التجارية الرقمية</p>
-  </div>
+<div class="title-box">
+  <h1>AI MARKETING ANALYZER</h1>
+  <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
+  <div class="line"></div>
+</div>
 
-  <div id="chat" class="messages"></div>
+<div id="chat" class="messages"></div>
 
 </div>
 
@@ -113,99 +142,106 @@ let answers = [];
 let step = 0;
 
 let questions = [
-"تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي.",
-"يساعد في فهم العملاء.",
-"الإعلانات أكثر جذباً.",
-"الثقة تزيد.",
-"يقلل التكلفة.",
-"يستهدف الجمهور بدقة.",
-"يعتمد عليه التسويق.",
-"يحسن تجربة المستخدم.",
-"يسرّع القرار.",
-"يعزز الولاء.",
-"فعال جداً.",
-"يساعد المحتوى.",
-"يتوقع السوق.",
-"ضروري الآن.",
-"يحسن العلامة.",
-"يقلل الأخطاء.",
-"يدعم السوشيال ميديا.",
-"الإعلانات المخصصة أفضل.",
-"يزيد التحويل.",
-"يزيد الأرباح.",
-"يساعد التحليل.",
-"يحسن التجارة.",
-"يقلل الاعتماد على البشر.",
-"المستقبل يعتمد عليه.",
-"هو الأساس."
+"تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
+"يساعد الذكاء الاصطناعي في فهم سلوك العملاء بشكل أدق.",
+"تحليل البيانات باستخدام الذكاء الاصطناعي يزيد من فعالية التسويق.",
+"الإعلانات المولدة بالذكاء الاصطناعي أكثر جذباً من التقليدية.",
+"الثقة بالإعلانات الرقمية تعتمد على وجود الذكاء الاصطناعي فيها.",
+"الذكاء الاصطناعي يقلل من تكلفة الحملات التسويقية.",
+"يساعد الذكاء الاصطناعي في استهداف الجمهور المناسب بدقة.",
+"تستخدم الشركات الكبرى الذكاء الاصطناعي بشكل واسع في التسويق.",
+"الذكاء الاصطناعي يحسن من تجربة المستخدم مع العلامة التجارية.",
+"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية.",
+"الذكاء الاصطناعي يعزز ولاء العملاء للعلامة التجارية.",
+"التسويق بالذكاء الاصطناعي أكثر فاعلية من التسويق التقليدي.",
+"أدوات الذكاء الاصطناعي تساعد في إنشاء محتوى إعلاني أفضل.",
+"الذكاء الاصطناعي يساعد في توقع اتجاهات السوق المستقبلية.",
+"الاعتماد على الذكاء الاصطناعي أصبح ضرورة للشركات الحديثة.",
+"استخدام الذكاء الاصطناعي يحسن من صورة العلامة التجارية.",
+"الذكاء الاصطناعي يقلل من الأخطاء في الحملات التسويقية.",
+"الذكاء الاصطناعي يساعد في تحسين إدارة وسائل التواصل الاجتماعي.",
+"الإعلانات المخصصة بالذكاء الاصطناعي أكثر نجاحاً.",
+"الذكاء الاصطناعي يرفع من معدل التحويل في التسويق الرقمي.",
+"الذكاء الاصطناعي يساهم في زيادة الأرباح للشركات.",
+"الذكاء الاصطناعي يسهل تحليل المنافسين في السوق.",
+"الذكاء الاصطناعي يحسن تجربة التسوق الإلكتروني.",
+"الاعتماد على الذكاء الاصطناعي يقلل الحاجة للعنصر البشري.",
+"مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
 ];
 
-window.onload = () => askQuestion();
+window.onload = () => {
+  askQuestion();
+};
 
 function askQuestion() {
+  if (step < questions.length) {
 
-  if (step >= questions.length) return finish();
+    let chat = document.getElementById("chat");
 
-  let chat = document.getElementById("chat");
+    let q = document.createElement("div");
+    q.className = "bot";
+    q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
 
-  let q = document.createElement("div");
-  q.className = "bot";
-  q.innerHTML = "السؤال " + (step+1) + ":<br>" + questions[step];
+    chat.appendChild(q);
 
-  let btns = document.createElement("div");
-  btns.className = "buttons";
+    let btns = document.createElement("div");
+    btns.className = "buttons";
 
-  btns.innerHTML = `
-    <button onclick="answer(3,this)">موافق</button>
-    <button onclick="answer(2,this)">محايد</button>
-    <button onclick="answer(1,this)">غير موافق</button>
-  `;
+    btns.innerHTML = `
+      <button onclick="answer(3, this)">موافق</button>
+      <button onclick="answer(2, this)">محايد</button>
+      <button onclick="answer(1, this)">غير موافق</button>
+    `;
 
-  chat.appendChild(q);
-  chat.appendChild(btns);
+    chat.appendChild(btns);
 
-  chat.scrollTop = chat.scrollHeight;
+    chat.scrollTop = chat.scrollHeight;
+
+  } else {
+    finish();
+  }
 }
 
 function answer(value, btn) {
 
+  let container = btn.parentElement;
+
+  if (container.classList.contains("answered")) return;
+
+  container.classList.add("answered");
+
   answers.push(value);
 
-  let buttons = btn.parentElement.querySelectorAll("button");
+  let buttons = container.querySelectorAll("button");
 
   buttons.forEach(b => {
-    b.disabled = true;
     b.classList.remove("selected");
+    b.disabled = true;
   });
 
-  // ✔ إبراز الزر المختار بشكل واضح جداً
   btn.classList.add("selected");
 
   setTimeout(() => {
     step++;
     askQuestion();
-  }, 300);
+
+    let chat = document.getElementById("chat");
+    chat.scrollTop = chat.scrollHeight;
+  }, 400);
 }
 
 function finish() {
-
-  let total = answers.reduce((a,b)=>a+b,0);
-  let max = answers.length * 3;
-  let percent = Math.round((total/max)*100);
-
-  let result =
-    percent >= 80 ? "تأثير قوي جداً" :
-    percent >= 50 ? "تأثير متوسط" :
-    "تأثير ضعيف";
+  let chat = document.getElementById("chat");
 
   let msg = document.createElement("div");
   msg.className = "bot";
   msg.innerText =
-    "تم الانتهاء.\n\n" +
-    "نسبة التأثير: " + percent + "%\n" +
-    result + "\n\nشكراً لمشاركتك.";
+    "تم الانتهاء من جميع الأسئلة بنجاح.\n\n" +
+    "نشكر لك مشاركتك في هذا الاستبيان، لقد ساهمت في نجاح الدراسة وتحقيق أهدافها.";
 
-  document.getElementById("chat").appendChild(msg);
+  chat.appendChild(msg);
+
+  chat.scrollTop = chat.scrollHeight;
 }
 
 </script>
