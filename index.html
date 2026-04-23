@@ -223,11 +223,10 @@ function answer(value, btn) {
 
   answers[step] = value;
 
-  // 🔥 فقط سكروول للأسفل
-  setTimeout(() => {
-    let chat = document.getElementById("chat");
-    chat.scrollTop = chat.scrollHeight;
-  }, 100);
+  // ✅ الإصلاح الوحيد المطلوب
+  step++;
+
+  askQuestion();
 }
 
 function finish() {
