@@ -131,7 +131,6 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
-let locked = false;
 
 let questions = [
 "يساهم التسويق بالذكاء الاصطناعي في تحسين صورة العلامة التجارية الرقمية.",
@@ -156,28 +155,26 @@ let questions = [
 "يساهم الذكاء الاصطناعي في رفع مستوى رضا العملاء عن العلامة التجارية."
 ];
 
-window.onload = () => askQuestion();
+window.onload = () => {
+  createQuestion(0);
+};
 
-function askQuestion() {
-  if (step >= questions.length) return finish();
+function createQuestion(index) {
+  if (index >= questions.length) return finish();
 
   let chat = document.getElementById("chat");
 
   let q = document.createElement("div");
   q.className = "bot";
-
-  // 🔥 تخزين رقم السؤال داخل العنصر نفسه (حل المشكلة النهائي)
-  q.dataset.index = step;
-
-  q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
+  q.innerHTML = "<strong>السؤال " + (index + 1) + ":</strong><br>" + questions[index];
 
   let btns = document.createElement("div");
   btns.className = "buttons";
 
   btns.innerHTML = `
-    <button onclick="answer(3,this)">موافق</button>
-    <button onclick="answer(2,this)">محايد</button>
-    <button onclick="answer(1,this)">غير موافق</button>
+    <button onclick="selectAnswer(${index},3,this)">موافق</button>
+    <button onclick="selectAnswer(${index},2,this)">محايد</button>
+    <button onclick="selectAnswer(${index},1,this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
@@ -185,30 +182,21 @@ function askQuestion() {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function answer(value, btn) {
-  if (locked) return;
-  locked = true;
-
-  let container = btn.parentElement;
-  let questionBox = container.previousElementSibling;
-
-  // 🔥 أخذ رقم السؤال الحقيقي من العنصر نفسه
-  const index = Number(questionBox.dataset.index);
+function selectAnswer(index, value, btn) {
+  if (answers[index] !== undefined) return;
 
   answers[index] = value;
 
+  let container = btn.parentElement;
   container.querySelectorAll("button").forEach(b => b.disabled = true);
   btn.classList.add("selected");
 
-  // 🔥 حماية من أي تداخل
-  if (step <= index) {
-    step = index + 1;
+  if (index === step) {
+    step++;
+    setTimeout(() => {
+      createQuestion(step);
+    }, 150);
   }
-
-  setTimeout(() => {
-    locked = false;
-    askQuestion();
-  }, 120);
 }
 
 function finish() {
