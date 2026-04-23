@@ -151,6 +151,9 @@ let answers = [];
 let step = 0;
 let sent = false;
 
+// 🔥 القفل الحقيقي
+let processing = false;
+
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
 "يساعد الذكاء الاصطناعي في فهم سلوك العملاء بشكل أدق.",
@@ -184,21 +187,18 @@ window.onload = () => {
 };
 
 function askQuestion() {
-  const chat = document.getElementById("chat");
-
-  // 🔥 حل المشكلة: عرض عنصر واحد فقط (بدون تراكم)
-  chat.innerHTML = "";
-
   if (step >= questions.length) {
     finish();
     return;
   }
 
-  const q = document.createElement("div");
-  q.className = "bot";
-  q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
+  let chat = document.getElementById("chat");
 
-  const btns = document.createElement("div");
+  let q = document.createElement("div");
+  q.className = "bot";
+  q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
+
+  let btns = document.createElement("div");
   btns.className = "buttons";
 
   btns.innerHTML = `
@@ -209,45 +209,48 @@ function askQuestion() {
 
   chat.appendChild(q);
   chat.appendChild(btns);
+  chat.scrollTop = chat.scrollHeight;
 }
 
 function answer(value, btn) {
-  // منع الضغط المكرر على نفس السؤال
-  const container = btn.parentElement;
-  if (container.dataset.locked === "1") return;
-  container.dataset.locked = "1";
 
-  container.querySelectorAll("button").forEach(b => b.disabled = true);
-  btn.classList.add("selected");
+  // 🔥 يمنع التكرار 100%
+  if (processing) return;
+  processing = true;
 
-  answers.push({
-    question: questions[step],
-    answer: value
+  let container = btn.parentElement;
+
+  container.querySelectorAll("button").forEach(b => {
+    b.disabled = true;
+    b.classList.remove("selected");
   });
 
+  btn.classList.add("selected");
+
+  answers[step] = value;
+
   step++;
-  // انتقال مباشر للسؤال التالي
-  askQuestion();
+
+  setTimeout(() => {
+    processing = false;
+    askQuestion();
+  }, 300);
 }
 
 function finish() {
   if (sent) return;
   sent = true;
 
-  const chat = document.getElementById("chat");
+  let chat = document.getElementById("chat");
 
-  chat.innerHTML = `
-    <div class="bot">
-      <strong>شكراً لمشاركتك 🙏</strong><br><br>
-      تم تسجيل إجاباتك بنجاح 🌟
-    </div>
+  let msg = document.createElement("div");
+  msg.className = "bot";
+  msg.innerHTML = `
+    <strong>شكراً لمشاركتك 🙏</strong><br><br>
+    تم تسجيل إجاباتك بنجاح 🌟
   `;
 
-  fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify({ responses: answers })
-  });
+  chat.appendChild(msg);
 }
 </script>
 
