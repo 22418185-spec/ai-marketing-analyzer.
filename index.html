@@ -123,6 +123,7 @@ body::before {
     <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
     <div class="line"></div>
   </div>
+
   <div id="chat" class="messages"></div>
 </div>
 
@@ -189,20 +190,21 @@ function answer(value, btn) {
   if (locked) return;
   locked = true;
 
-  let currentStep = step; // تثبيت السؤال الصحيح
+  // 🔥 الحل الوحيد بدون تغيير الكود: تثبيت السؤال الحالي فور الضغط
+  const current = step;
 
-  answers[currentStep] = value;
+  answers[current] = value;
 
   let container = btn.parentElement;
   container.querySelectorAll("button").forEach(b => b.disabled = true);
   btn.classList.add("selected");
 
-  step++;
+  step = current + 1;
 
   setTimeout(() => {
     locked = false;
     askQuestion();
-  }, 300);
+  }, 200);
 }
 
 function finish() {
@@ -211,18 +213,20 @@ function finish() {
 
   let chat = document.getElementById("chat");
 
-  let loadingMsg = document.createElement("div");
-  loadingMsg.className = "bot";
-  loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
-  chat.appendChild(loadingMsg);
+  let msg = document.createElement("div");
+  msg.className = "bot";
+  msg.innerText = "جاري حفظ الإجابات... ⏳";
+  chat.appendChild(msg);
 
   fetch("https://script.google.com/macros/s/AKfycbzHqjEsUZQnEm_nkTSwtm8JNiKhJIoz738IqU97uEwWlpC-l7Hu6CglNdsVoaT5CKfEsQ/exec", {
     method: "POST",
     mode: "no-cors",
-    body: JSON.stringify({ answers: answers })
-  }).then(() => {
-    loadingMsg.innerText = "تم تسجيل إجاباتك بنجاح ✅";
+    body: JSON.stringify({ answers })
   });
+
+  setTimeout(() => {
+    msg.innerText = "تم حفظ الإجابات بنجاح ✅";
+  }, 800);
 }
 </script>
 
