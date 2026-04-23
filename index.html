@@ -125,7 +125,6 @@ body::before {
   color: white !important;
   box-shadow: 0 0 15px #00e5ff;
   transform: scale(1.08);
-  opacity: 1 !important;
 }
 
 .buttons button:disabled {
@@ -150,8 +149,6 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
-
-// 🔥 حماية من التكرار
 let isProcessing = false;
 
 let questions = [
@@ -229,9 +226,6 @@ function answer(value, btn) {
   if (container.dataset.locked === "1") return;
   container.dataset.locked = "1";
 
-  if (isProcessing) return;
-  isProcessing = true;
-
   container.querySelectorAll("button").forEach(b => {
     b.disabled = true;
     b.classList.remove("selected");
@@ -239,13 +233,17 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  answers[step] = value;
+  // 🔥 الربط الصحيح: كل سؤال مع إجابته
+  answers.push({
+    question: questions[step],
+    answer: value
+  });
+
   step++;
 
   setTimeout(() => {
-    isProcessing = false;
     askQuestion();
-  }, 400);
+  }, 300);
 }
 
 function finish() {
@@ -259,12 +257,10 @@ function finish() {
   loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
   chat.appendChild(loadingMsg);
 
-  chat.scrollTop = chat.scrollHeight;
-
   fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
     method: "POST",
     mode: "no-cors",
-    body: JSON.stringify({ answers: answers })
+    body: JSON.stringify({ responses: answers })
   }).then(() => {
     loadingMsg.remove();
 
@@ -272,7 +268,7 @@ function finish() {
     msg.className = "bot";
     msg.innerHTML = `
       <strong>شكراً لمشاركتك 🙏</strong><br><br>
-      تم تسجيل إجاباتك بنجاح وساهمت في نجاح الدراسة 🌟
+      تم تسجيل إجاباتك بنجاح 🌟
     `;
 
     chat.appendChild(msg);
