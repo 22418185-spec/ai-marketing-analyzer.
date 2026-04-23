@@ -8,6 +8,7 @@
 <title>AI Marketing Analyzer</title>
 
 <style>
+
 body {
   margin: 0;
   font-family: 'Cairo', sans-serif;
@@ -132,6 +133,7 @@ body::before {
   opacity: 0.5;
   cursor: default;
 }
+
 </style>
 </head>
 
@@ -147,12 +149,10 @@ body::before {
 </div>
 
 <script>
+
 let answers = [];
 let step = 0;
 let sent = false;
-
-// 🔥 القفل الحقيقي
-let processing = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -187,6 +187,7 @@ window.onload = () => {
 };
 
 function askQuestion() {
+
   if (step >= questions.length) {
     finish();
     return;
@@ -196,10 +197,13 @@ function askQuestion() {
 
   let q = document.createElement("div");
   q.className = "bot";
-  q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
+  q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
 
   let btns = document.createElement("div");
   btns.className = "buttons";
+
+  // 🔥 تثبيت رقم السؤال لحل المشكلة
+  btns.dataset.index = step;
 
   btns.innerHTML = `
     <button onclick="answer(3, this)">موافق</button>
@@ -214,11 +218,13 @@ function askQuestion() {
 
 function answer(value, btn) {
 
-  // 🔥 يمنع التكرار 100%
-  if (processing) return;
-  processing = true;
-
   let container = btn.parentElement;
+
+  // 🔥 الرقم الحقيقي للسؤال (حل المشكلة الأساسية)
+  let index = Number(container.dataset.index);
+
+  if (container.dataset.locked === "1") return;
+  container.dataset.locked = "1";
 
   container.querySelectorAll("button").forEach(b => {
     b.disabled = true;
@@ -227,19 +233,20 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  answers[step] = value;
+  // 🔥 تخزين صحيح بدون انزلاق
+  answers[index] = value;
 
-  step++;
+  // 🔥 تقدم مضبوط
+  if (index === step) {
+    step++;
+  }
 
   setTimeout(() => {
-    processing = false;
     askQuestion();
-  }, 300);
+  }, 250);
 }
 
 function finish() {
-  if (sent) return;
-  sent = true;
 
   let chat = document.getElementById("chat");
 
@@ -252,6 +259,7 @@ function finish() {
 
   chat.appendChild(msg);
 }
+
 </script>
 
 </body>
