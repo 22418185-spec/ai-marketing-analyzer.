@@ -125,6 +125,7 @@ body::before {
   color: white !important;
   box-shadow: 0 0 15px #00e5ff;
   transform: scale(1.08);
+  opacity: 1 !important;
 }
 
 .buttons button:disabled {
@@ -142,7 +143,6 @@ body::before {
     <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
     <div class="line"></div>
   </div>
-
   <div id="chat" class="messages"></div>
 </div>
 
@@ -150,9 +150,6 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
-
-// 🔥 القفل الحقيقي لمنع التكرار
-let isLocked = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -187,92 +184,69 @@ window.onload = () => {
 };
 
 function askQuestion() {
+  const chat = document.getElementById("chat");
 
-  if (isLocked) return;
-  isLocked = true;
+  // 🔥 حل المشكلة: عرض عنصر واحد فقط (بدون تراكم)
+  chat.innerHTML = "";
 
   if (step >= questions.length) {
     finish();
-    isLocked = false;
     return;
   }
 
-  let chat = document.getElementById("chat");
-
-  let q = document.createElement("div");
+  const q = document.createElement("div");
   q.className = "bot";
   q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
 
-  let btns = document.createElement("div");
+  const btns = document.createElement("div");
   btns.className = "buttons";
 
   btns.innerHTML = `
-    <button onclick="answer(3, this)" disabled>موافق</button>
-    <button onclick="answer(2, this)" disabled>محايد</button>
-    <button onclick="answer(1, this)" disabled>غير موافق</button>
+    <button onclick="answer(3, this)">موافق</button>
+    <button onclick="answer(2, this)">محايد</button>
+    <button onclick="answer(1, this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
   chat.appendChild(btns);
-  chat.scrollTop = chat.scrollHeight;
-
-  setTimeout(() => {
-    btns.querySelectorAll("button").forEach(b => b.disabled = false);
-    isLocked = false;
-  }, 300);
 }
 
 function answer(value, btn) {
-
-  let container = btn.parentElement;
-
+  // منع الضغط المكرر على نفس السؤال
+  const container = btn.parentElement;
   if (container.dataset.locked === "1") return;
   container.dataset.locked = "1";
 
-  container.querySelectorAll("button").forEach(b => {
-    b.disabled = true;
-  });
-
+  container.querySelectorAll("button").forEach(b => b.disabled = true);
   btn.classList.add("selected");
 
-  // 🔥 ربط آمن بدون أي step وقت التخزين
   answers.push({
     question: questions[step],
     answer: value
   });
 
   step++;
-
-  setTimeout(() => {
-    askQuestion();
-  }, 200);
+  // انتقال مباشر للسؤال التالي
+  askQuestion();
 }
 
 function finish() {
   if (sent) return;
   sent = true;
 
-  let chat = document.getElementById("chat");
+  const chat = document.getElementById("chat");
 
-  let loading = document.createElement("div");
-  loading.className = "bot";
-  loading.innerText = "جاري حفظ إجاباتك... ⏳";
-  chat.appendChild(loading);
+  chat.innerHTML = `
+    <div class="bot">
+      <strong>شكراً لمشاركتك 🙏</strong><br><br>
+      تم تسجيل إجاباتك بنجاح 🌟
+    </div>
+  `;
 
   fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({ responses: answers })
-  }).then(() => {
-
-    loading.remove();
-
-    let msg = document.createElement("div");
-    msg.className = "bot";
-    msg.innerHTML = "<strong>شكراً لمشاركتك 🙏</strong><br>تم تسجيل إجاباتك بنجاح 🌟";
-
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
   });
 }
 </script>
