@@ -150,7 +150,9 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
-let isProcessing = false;
+
+// 🔥 أهم حل للمشكلة: قفل كامل للتنفيذ
+let locked = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -186,12 +188,12 @@ window.onload = () => {
 
 function askQuestion() {
 
-  if (isProcessing) return;
-  isProcessing = true;
+  if (locked) return;
+  locked = true;
 
   if (step >= questions.length) {
     finish();
-    isProcessing = false;
+    locked = false;
     return;
   }
 
@@ -216,8 +218,8 @@ function askQuestion() {
 
   setTimeout(() => {
     btns.querySelectorAll("button").forEach(b => b.disabled = false);
-    isProcessing = false;
-  }, 400);
+    locked = false;
+  }, 300);
 }
 
 function answer(value, btn) {
@@ -234,9 +236,10 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  // 🔥 الحل الأساسي: أخذ السؤال من مكانه الحقيقي وليس step
-  let questionBox = container.previousElementSibling;
-  let questionText = questionBox.innerText.replace(/^السؤال \d+:/, "").trim();
+  // 🔥 ربط مباشر بدون اعتماد على step وقت التخزين
+  let questionText = container.previousElementSibling.innerText
+    .replace(/^السؤال \d+:/, "")
+    .trim();
 
   answers.push({
     question: questionText,
