@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
 <title>AI Marketing Analyzer</title>
 
@@ -19,7 +18,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 body::before {
   content: "";
   position: fixed;
@@ -31,12 +29,10 @@ body::before {
   animation: stars 60s linear infinite;
   z-index: -1;
 }
-
 @keyframes stars {
   from { transform: translateY(0); }
   to { transform: translateY(-500px); }
 }
-
 .chat-container {
   width: 95%;
   max-width: 600px;
@@ -48,12 +44,10 @@ body::before {
   display: flex;
   flex-direction: column;
 }
-
 .title-box {
   text-align: center;
   margin-bottom: 15px;
 }
-
 .title-box h1 {
   font-size: 20px;
   font-weight: 600;
@@ -61,66 +55,62 @@ body::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .title-box p {
   font-size: 12px;
   color: #ccc;
 }
-
 .line {
   width: 60%;
   height: 2px;
   margin: 8px auto;
   background: linear-gradient(to right, transparent, #00e5ff, transparent);
 }
-
 .messages {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
 }
-
 .bot {
   background: rgba(255,255,255,0.08);
   padding: 12px;
   border-radius: 15px;
   margin: 6px;
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.4s ease;
 }
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .buttons {
   display: flex;
   gap: 10px;
   margin: 12px 6px;
   flex-wrap: wrap;
 }
-
 .buttons button {
   flex: 1;
   min-width: 100px;
-  padding: 10px;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid rgba(0,229,255,0.3);
   background: rgba(0,229,255,0.08);
   color: #00e5ff;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
+  outline: none;
 }
-
 .buttons button:hover:not(:disabled) {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
 }
-
 .buttons button.selected {
   background: linear-gradient(135deg, #00e5ff, #0077ff) !important;
   color: white !important;
+}
+.buttons button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 </style>
 </head>
@@ -137,9 +127,10 @@ body::before {
 </div>
 
 <script>
-
 let answers = [];
 let step = 0;
+let sent = false;
+let locked = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -151,19 +142,28 @@ let questions = [
 "يساعد الذكاء الاصطناعي في استهداف الجمهور المناسب بدقة.",
 "تستخدم الشركات الكبرى الذكاء الاصطناعي بشكل واسع في التسويق.",
 "الذكاء الاصطناعي يحسن من تجربة المستخدم مع العلامة التجارية.",
-"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية."
+"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية.",
+"الذكاء الاصطناعي يعزز ولاء العملاء للعلامة التجارية.",
+"التسويق بالذكاء الاصطناعي أكثر فاعلية من التسويق التقليدي.",
+"أدوات الذكاء الاصطناعي تساعد في إنشاء محتوى إعلاني أفضل.",
+"الذكاء الاصطناعي يساعد في توقع اتجاهات السوق المستقبلية.",
+"الاعتماد على الذكاء الاصطناعي أصبح ضرورة للشركات الحديثة.",
+"استخدام الذكاء الاصطناعي يحسن من صورة العلامة التجارية.",
+"الذكاء الاصطناعي يقلل من الأخطاء في الحملات التسويقية.",
+"الذكاء الاصطناعي يساعد في تحسين إدارة وسائل التواصل الاجتماعي.",
+"الإعلانات المخصصة بالذكاء الاصطناعي أكثر نجاحاً.",
+"الذكاء الاصطناعي يرفع من معدل التحويل في التسويق الرقمي.",
+"الذكاء الاصطناعي يساهم في زيادة الأرباح للشركات.",
+"الذكاء الاصطناعي يسهل تحليل المنافسين في السوق.",
+"الذكاء الاصطناعي يحسن تجربة التسوق الإلكتروني.",
+"الاعتماد على الذكاء الاصطناعي يقلل الحاجة للعنصر البشري.",
+"مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
 ];
 
-window.onload = () => {
-  askQuestion();
-};
+window.onload = () => askQuestion();
 
 function askQuestion() {
-
-  if (step >= questions.length) {
-    finish();
-    return;
-  }
+  if (step >= questions.length) return finish();
 
   let chat = document.getElementById("chat");
 
@@ -174,13 +174,10 @@ function askQuestion() {
   let btns = document.createElement("div");
   btns.className = "buttons";
 
-  // 🔥 FIX الوحيد هنا
-  let currentIndex = step;
-
   btns.innerHTML = `
-    <button onclick="answer(3, ${currentIndex}, this)">موافق</button>
-    <button onclick="answer(2, ${currentIndex}, this)">محايد</button>
-    <button onclick="answer(1, ${currentIndex}, this)">غير موافق</button>
+    <button onclick="answer(3,this)">موافق</button>
+    <button onclick="answer(2,this)">محايد</button>
+    <button onclick="answer(1,this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
@@ -188,56 +185,45 @@ function askQuestion() {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function answer(value, index, btn) {
+function answer(value, btn) {
+  if (locked) return;
+  locked = true;
+
+  let currentStep = step; // تثبيت السؤال الصحيح
+
+  answers[currentStep] = value;
 
   let container = btn.parentElement;
-
-  if (container.dataset.locked === "1") return;
-  container.dataset.locked = "1";
-
-  container.querySelectorAll("button").forEach(b => {
-    b.disabled = true;
-    b.classList.remove("selected");
-  });
-
+  container.querySelectorAll("button").forEach(b => b.disabled = true);
   btn.classList.add("selected");
 
-  answers[index] = value;
-
-  if (index === step) {
-    step++;
-  }
+  step++;
 
   setTimeout(() => {
+    locked = false;
     askQuestion();
-  }, 250);
+  }, 300);
 }
 
 function finish() {
-
-  fetch("https://script.google.com/macros/s/AKfycbzpvG-uaev_NUwvCLEvYcMTTFuL8JM5eq6gIyOPIbIcedUFWjqbg2IcPPvvRYg2vqP1/exec", {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      answers: answers
-    })
-  });
+  if (sent) return;
+  sent = true;
 
   let chat = document.getElementById("chat");
 
-  let msg = document.createElement("div");
-  msg.className = "bot";
-  msg.innerHTML = `
-    <strong>شكراً لمشاركتك 🙏</strong><br><br>
-    تم تسجيل إجاباتك بنجاح 🌟
-  `;
+  let loadingMsg = document.createElement("div");
+  loadingMsg.className = "bot";
+  loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
+  chat.appendChild(loadingMsg);
 
-  chat.appendChild(msg);
+  fetch("https://script.google.com/macros/s/AKfycbzHqjEsUZQnEm_nkTSwtm8JNiKhJIoz738IqU97uEwWlpC-l7Hu6CglNdsVoaT5CKfEsQ/exec", {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ answers: answers })
+  }).then(() => {
+    loadingMsg.innerText = "تم تسجيل إجاباتك بنجاح ✅";
+  });
 }
-
 </script>
 
 </body>
