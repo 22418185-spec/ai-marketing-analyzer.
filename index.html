@@ -140,7 +140,6 @@ body::before {
 
 let answers = [];
 let step = 0;
-let sent = false;
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -175,10 +174,13 @@ function askQuestion() {
   let btns = document.createElement("div");
   btns.className = "buttons";
 
+  // 🔥 FIX الوحيد هنا
+  let currentIndex = step;
+
   btns.innerHTML = `
-    <button onclick="answer(3, ${step}, this)">موافق</button>
-    <button onclick="answer(2, ${step}, this)">محايد</button>
-    <button onclick="answer(1, ${step}, this)">غير موافق</button>
+    <button onclick="answer(3, ${currentIndex}, this)">موافق</button>
+    <button onclick="answer(2, ${currentIndex}, this)">محايد</button>
+    <button onclick="answer(1, ${currentIndex}, this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
@@ -200,7 +202,6 @@ function answer(value, index, btn) {
 
   btn.classList.add("selected");
 
-  // 🔥 FIX فقط هنا (بدون تغيير باقي الكود)
   answers[index] = value;
 
   if (index === step) {
@@ -214,7 +215,6 @@ function answer(value, index, btn) {
 
 function finish() {
 
-  // 🔥 Google Sheets (إضافة فقط)
   fetch("https://script.google.com/macros/s/AKfycbzpvG-uaev_NUwvCLEvYcMTTFuL8JM5eq6gIyOPIbIcedUFWjqbg2IcPPvvRYg2vqP1/exec", {
     method: "POST",
     mode: "no-cors",
