@@ -8,7 +8,6 @@
 <title>AI Marketing Analyzer</title>
 
 <style>
-
 body {
   margin: 0;
   font-family: 'Cairo', sans-serif;
@@ -133,7 +132,6 @@ body::before {
   opacity: 0.5;
   cursor: default;
 }
-
 </style>
 </head>
 
@@ -164,22 +162,7 @@ let questions = [
 "يساعد الذكاء الاصطناعي في استهداف الجمهور المناسب بدقة.",
 "تستخدم الشركات الكبرى الذكاء الاصطناعي بشكل واسع في التسويق.",
 "الذكاء الاصطناعي يحسن من تجربة المستخدم مع العلامة التجارية.",
-"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية.",
-"الذكاء الاصطناعي يعزز ولاء العملاء للعلامة التجارية.",
-"التسويق بالذكاء الاصطناعي أكثر فاعلية من التسويق التقليدي.",
-"أدوات الذكاء الاصطناعي تساعد في إنشاء محتوى إعلاني أفضل.",
-"الذكاء الاصطناعي يساعد في توقع اتجاهات السوق المستقبلية.",
-"الاعتماد على الذكاء الاصطناعي أصبح ضرورة للشركات الحديثة.",
-"استخدام الذكاء الاصطناعي يحسن من صورة العلامة التجارية.",
-"الذكاء الاصطناعي يقلل من الأخطاء في الحملات التسويقية.",
-"الذكاء الاصطناعي يساعد في تحسين إدارة وسائل التواصل الاجتماعي.",
-"الإعلانات المخصصة بالذكاء الاصطناعي أكثر نجاحاً.",
-"الذكاء الاصطناعي يرفع من معدل التحويل في التسويق الرقمي.",
-"الذكاء الاصطناعي يساهم في زيادة الأرباح للشركات.",
-"الذكاء الاصطناعي يسهل تحليل المنافسين في السوق.",
-"الذكاء الاصطناعي يحسن تجربة التسوق الإلكتروني.",
-"الاعتماد على الذكاء الاصطناعي يقلل الحاجة للعنصر البشري.",
-"مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
+"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية."
 ];
 
 window.onload = () => {
@@ -197,13 +180,10 @@ function askQuestion() {
 
   let q = document.createElement("div");
   q.className = "bot";
-  q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
+  q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
 
   let btns = document.createElement("div");
   btns.className = "buttons";
-
-  // 🔥 تثبيت رقم السؤال لحل المشكلة
-  btns.dataset.index = step;
 
   btns.innerHTML = `
     <button onclick="answer(3, this)">موافق</button>
@@ -220,9 +200,6 @@ function answer(value, btn) {
 
   let container = btn.parentElement;
 
-  // 🔥 الرقم الحقيقي للسؤال (حل المشكلة الأساسية)
-  let index = Number(container.dataset.index);
-
   if (container.dataset.locked === "1") return;
   container.dataset.locked = "1";
 
@@ -233,13 +210,10 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  // 🔥 تخزين صحيح بدون انزلاق
-  answers[index] = value;
-
-  // 🔥 تقدم مضبوط
-  if (index === step) {
-    step++;
-  }
+  // 🔥 FIX الحقيقي للمشكلة
+  let currentIndex = step;
+  answers[currentIndex] = value;
+  step = currentIndex + 1;
 
   setTimeout(() => {
     askQuestion();
