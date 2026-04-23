@@ -2,8 +2,6 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-
-<!-- 🔥 مهم جداً للموبايل -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
@@ -16,8 +14,6 @@ body {
   font-family: 'Cairo', sans-serif;
   color: white;
   background: radial-gradient(circle at top, #0f0c29, #1a1a40, #000);
-
-  /* 🔥 إصلاح الموبايل */
   min-height: 100vh;
   overflow-x: hidden;
   display: flex;
@@ -42,7 +38,6 @@ body::before {
   to { transform: translateY(-500px); }
 }
 
-/* 🔥 أهم تعديل هنا */
 .chat-container {
   width: 95%;
   max-width: 600px;
@@ -97,7 +92,7 @@ body::before {
   display: flex;
   gap: 10px;
   margin: 12px 6px;
-  flex-wrap: wrap; /* 🔥 مهم للموبايل */
+  flex-wrap: wrap;
 }
 
 .buttons button {
@@ -228,10 +223,11 @@ function answer(value, btn) {
 
   answers[step] = value;
 
+  // 🔥 فقط سكروول للأسفل
   setTimeout(() => {
-    step++;
-    askQuestion();
-  }, 250);
+    let chat = document.getElementById("chat");
+    chat.scrollTop = chat.scrollHeight;
+  }, 100);
 }
 
 function finish() {
