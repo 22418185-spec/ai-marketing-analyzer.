@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
 <title>AI Marketing Analyzer</title>
 <style>
@@ -16,6 +16,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: manipulation; /* تسريع اللمس في كل الأجهزة */
 }
 body::before {
   content: "";
@@ -74,11 +75,6 @@ body::before {
   padding: 12px;
   border-radius: 15px;
   margin: 6px;
-  animation: fadeIn 0.4s ease;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 .buttons {
   display: flex;
@@ -96,21 +92,19 @@ body::before {
   color: #00e5ff;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-  outline: none; /* عشان نشيل أي إطار تركيز */
+  transition: 0.3s;
+  -webkit-tap-highlight-color: transparent;
 }
 .buttons button:hover:not(:disabled) {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
-  box-shadow: 0 0 10px #00e5ff;
 }
 .buttons button.selected {
-  background: linear-gradient(135deg, #00e5ff, #0077ff) !important;
-  color: white !important;
-  opacity: 1 !important;
+  background: linear-gradient(135deg, #00e5ff, #0077ff);
+  color: white;
 }
 .buttons button:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: default;
 }
 </style>
@@ -130,6 +124,7 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
+let isProcessing = false; // القفل السحري لكل الأجهزة
 
 let questions = [
 "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
@@ -159,11 +154,12 @@ let questions = [
 "مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
 ];
 
-window.onload = () => { askQuestion(); };
+window.onload = askQuestion;
 
 function askQuestion() {
   if (step >= questions.length) { finish(); return; }
 
+  isProcessing = false; // فك القفل للسؤال الجديد
   let chat = document.getElementById("chat");
   let q = document.createElement("div");
   q.className = "bot";
@@ -172,66 +168,51 @@ function askQuestion() {
   let btns = document.createElement("div");
   btns.className = "buttons";
   btns.innerHTML = `
-    <button onclick="answer(3, this)" disabled>موافق</button>
-    <button onclick="answer(2, this)" disabled>محايد</button>
-    <button onclick="answer(1, this)" disabled>غير موافق</button>
+    <button onclick="answer(3, this)">موافق</button>
+    <button onclick="answer(2, this)">محايد</button>
+    <button onclick="answer(1, this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
   chat.appendChild(btns);
   chat.scrollTop = chat.scrollHeight;
-
-  // زدنا الوقت لـ 800ms عشان نضمن تماماً إن الحالة القديمة انتهت
-  setTimeout(() => {
-    btns.querySelectorAll("button").forEach(b => b.disabled = false);
-  }, 800);
 }
 
 function answer(value, btn) {
-  // أهم حركة: إزالة التركيز عن الزر فوراً
-  btn.blur(); 
-  
-  let container = btn.parentElement;
-  if (container.dataset.locked === "1") return;
-  container.dataset.locked = "1";
+  // إذا القفل مفعل، لا تسوي شي (الحل النهائي للسامسونج والآيفون)
+  if (isProcessing) return;
+  isProcessing = true; 
 
+  let container = btn.parentElement;
+  
+  // تعطيل فوري للأزرار
   container.querySelectorAll("button").forEach(b => {
     b.disabled = true;
-    b.classList.remove("selected");
   });
-  btn.classList.add("selected");
 
+  btn.classList.add("selected");
   answers[step] = value;
   step++;
 
-  // وقت انتظار كافي قبل ظهور السؤال التالي
-  setTimeout(() => {
-    askQuestion();
-  }, 500);
+  // سرعة استجابة سريعة جداً (100ms) ومستحيل يكرر بوجود القفل
+  setTimeout(askQuestion, 100);
 }
 
 function finish() {
   if (sent) return;
   sent = true;
-  let chat = document.getElementById("chat");
-  let loadingMsg = document.createElement("div");
-  loadingMsg.className = "bot";
-  loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
-  chat.appendChild(loadingMsg);
-  chat.scrollTop = chat.scrollHeight;
-
   fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({ answers: answers })
-  }).then(() => {
-    loadingMsg.remove();
-    let msg = document.createElement("div");
-    msg.className = "bot";
-    msg.innerHTML = "<strong>شكراً لمشاركتك 🙏</strong><br><br>تم تسجيل إجاباتك بنجاح 🌟";
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
   });
+
+  let chat = document.getElementById("chat");
+  let msg = document.createElement("div");
+  msg.className = "bot";
+  msg.innerHTML = "<strong>شكراً لمشاركتك 🙏</strong><br><br>تم تسجيل إجاباتك بنجاح 🌟";
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 </body>
