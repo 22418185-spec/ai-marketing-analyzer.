@@ -142,6 +142,7 @@ body::before {
     <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
     <div class="line"></div>
   </div>
+
   <div id="chat" class="messages"></div>
 </div>
 
@@ -198,7 +199,7 @@ function askQuestion() {
 
   let q = document.createElement("div");
   q.className = "bot";
-  q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
+  q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
 
   let btns = document.createElement("div");
   btns.className = "buttons";
@@ -216,7 +217,7 @@ function askQuestion() {
   setTimeout(() => {
     btns.querySelectorAll("button").forEach(b => b.disabled = false);
     isProcessing = false;
-  }, 500);
+  }, 400);
 }
 
 function answer(value, btn) {
@@ -233,9 +234,12 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  // 🔥 الربط الصحيح: كل سؤال مع إجابته
+  // 🔥 الحل الأساسي: أخذ السؤال من مكانه الحقيقي وليس step
+  let questionBox = container.previousElementSibling;
+  let questionText = questionBox.innerText.replace(/^السؤال \d+:/, "").trim();
+
   answers.push({
-    question: questions[step],
+    question: questionText,
     answer: value
   });
 
@@ -262,6 +266,7 @@ function finish() {
     mode: "no-cors",
     body: JSON.stringify({ responses: answers })
   }).then(() => {
+
     loadingMsg.remove();
 
     let msg = document.createElement("div");
