@@ -8,7 +8,6 @@
 <title>AI Marketing Analyzer</title>
 
 <style>
-
 body {
   margin: 0;
   font-family: 'Cairo', sans-serif;
@@ -86,6 +85,12 @@ body::before {
   padding: 12px;
   border-radius: 15px;
   margin: 6px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .buttons {
@@ -108,7 +113,7 @@ body::before {
   transition: 0.3s;
 }
 
-.buttons button:hover {
+.buttons button:hover:not(:disabled) {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
   box-shadow: 0 0 10px #00e5ff;
@@ -116,36 +121,32 @@ body::before {
 }
 
 .buttons button.selected {
-  background: linear-gradient(135deg, #00e5ff, #0077ff);
-  color: white;
+  background: linear-gradient(135deg, #00e5ff, #0077ff) !important;
+  color: white !important;
   box-shadow: 0 0 15px #00e5ff;
   transform: scale(1.08);
+  opacity: 1 !important;
 }
 
 .buttons button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.5;
+  cursor: default;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="chat-container">
-
-<div class="title-box">
-  <h1>AI MARKETING ANALYZER</h1>
-  <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
-  <div class="line"></div>
-</div>
-
-<div id="chat" class="messages"></div>
-
+  <div class="title-box">
+    <h1>AI MARKETING ANALYZER</h1>
+    <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
+    <div class="line"></div>
+  </div>
+  <div id="chat" class="messages"></div>
 </div>
 
 <script>
-
 let answers = [];
 let step = 0;
 let sent = false;
@@ -183,7 +184,6 @@ window.onload = () => {
 };
 
 function askQuestion() {
-
   if (step >= questions.length) {
     finish();
     return;
@@ -198,60 +198,72 @@ function askQuestion() {
   let btns = document.createElement("div");
   btns.className = "buttons";
 
+  // بنحط disabled في البداية عشان نمنع الكبس التلقائي
   btns.innerHTML = `
-    <button onclick="answer(3, this)">موافق</button>
-    <button onclick="answer(2, this)">محايد</button>
-    <button onclick="answer(1, this)">غير موافق</button>
+    <button onclick="answer(3, this)" disabled>موافق</button>
+    <button onclick="answer(2, this)" disabled>محايد</button>
+    <button onclick="answer(1, this)" disabled>غير موافق</button>
   `;
 
   chat.appendChild(q);
   chat.appendChild(btns);
-
   chat.scrollTop = chat.scrollHeight;
+
+  // تفعيل الأزرار بعد 500ms عشان نضمن إن المستخدم شال إيده عن السؤال الماضي
+  setTimeout(() => {
+    btns.querySelectorAll("button").forEach(b => b.disabled = false);
+  }, 500);
 }
 
 function answer(value, btn) {
-
   let container = btn.parentElement;
 
   if (container.dataset.locked === "1") return;
   container.dataset.locked = "1";
 
-  container.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
-
+  // قفل الأزرار فوراً بعد الكبسة وتمييز الزر المختار
+  container.querySelectorAll("button").forEach(b => {
+    b.disabled = true;
+    b.classList.remove("selected");
+  });
   btn.classList.add("selected");
 
   answers[step] = value;
-
-  // ✅ الإصلاح الوحيد المطلوب
   step++;
 
-  askQuestion();
+  // تأخير بسيط قبل ظهور السؤال الجديد لشكل أجمل ومنع الاستعجال
+  setTimeout(() => {
+    askQuestion();
+  }, 400);
 }
 
 function finish() {
-
   if (sent) return;
   sent = true;
 
+  let chat = document.getElementById("chat");
+  let loadingMsg = document.createElement("div");
+  loadingMsg.className = "bot";
+  loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
+  chat.appendChild(loadingMsg);
+  chat.scrollTop = chat.scrollHeight;
+
   fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
     method: "POST",
+    mode: "no-cors",
     body: JSON.stringify({ answers: answers })
+  }).then(() => {
+    loadingMsg.remove();
+    let msg = document.createElement("div");
+    msg.className = "bot";
+    msg.innerHTML = `
+      <strong>شكراً لمشاركتك 🙏</strong><br><br>
+      تم تسجيل إجاباتك بنجاح وساهمت في نجاح الدراسة 🌟
+    `;
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
   });
-
-  let chat = document.getElementById("chat");
-
-  let msg = document.createElement("div");
-  msg.className = "bot";
-
-  msg.innerHTML = `
-    <strong>شكراً لمشاركتك 🙏</strong><br><br>
-    تم تسجيل إجاباتك بنجاح وساهمت في نجاح الدراسة 🌟
-  `;
-
-  chat.appendChild(msg);
 }
-
 </script>
 
 </body>
