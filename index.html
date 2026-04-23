@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
 <title>AI Marketing Analyzer</title>
 
 <style>
+/* القسم الخاص بالتصميم (نفس ستايلك مع تعديلات طفيفة للاستقرار) */
 body {
   margin: 0;
   font-family: 'Cairo', sans-serif;
@@ -82,10 +82,11 @@ body::before {
 
 .bot {
   background: rgba(255,255,255,0.08);
-  padding: 12px;
+  padding: 15px;
   border-radius: 15px;
-  margin: 6px;
-  animation: fadeIn 0.5s ease;
+  margin: 10px 6px;
+  animation: fadeIn 0.5s ease forwards;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 @keyframes fadeIn {
@@ -96,13 +97,13 @@ body::before {
 .buttons {
   display: flex;
   gap: 10px;
-  margin: 12px 6px;
+  margin: 5px 6px 20px 6px;
   flex-wrap: wrap;
 }
 
 .buttons button {
   flex: 1;
-  min-width: 100px;
+  min-width: 90px;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid rgba(0,229,255,0.3);
@@ -111,6 +112,7 @@ body::before {
   font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
+  font-family: 'Cairo', sans-serif;
 }
 
 .buttons button:hover:not(:disabled) {
@@ -124,11 +126,12 @@ body::before {
   background: linear-gradient(135deg, #00e5ff, #0077ff) !important;
   color: white !important;
   box-shadow: 0 0 15px #00e5ff;
-  transform: scale(1.08);
+  transform: scale(1.05);
+  opacity: 1 !important;
 }
 
 .buttons button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: default;
 }
 </style>
@@ -150,36 +153,34 @@ body::before {
 let answers = [];
 let step = 0;
 let sent = false;
+let isProcessing = false; // قفل حماية لمنع التكرار
 
-// 🔥 أهم حل للمشكلة: قفل كامل للتنفيذ
-let locked = false;
-
-let questions = [
-"تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
-"يساعد الذكاء الاصطناعي في فهم سلوك العملاء بشكل أدق.",
-"تحليل البيانات باستخدام الذكاء الاصطناعي يزيد من فعالية التسويق.",
-"الإعلانات المولدة بالذكاء الاصطناعي أكثر جذباً من التقليدية.",
-"الثقة بالإعلانات الرقمية تعتمد على وجود الذكاء الاصطناعي فيها.",
-"الذكاء الاصطناعي يقلل من تكلفة الحملات التسويقية.",
-"يساعد الذكاء الاصطناعي في استهداف الجمهور المناسب بدقة.",
-"تستخدم الشركات الكبرى الذكاء الاصطناعي بشكل واسع في التسويق.",
-"الذكاء الاصطناعي يحسن من تجربة المستخدم مع العلامة التجارية.",
-"الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية.",
-"الذكاء الاصطناعي يعزز ولاء العملاء للعلامة التجارية.",
-"التسويق بالذكاء الاصطناعي أكثر فاعلية من التسويق التقليدي.",
-"أدوات الذكاء الاصطناعي تساعد في إنشاء محتوى إعلاني أفضل.",
-"الذكاء الاصطناعي يساعد في توقع اتجاهات السوق المستقبلية.",
-"الاعتماد على الذكاء الاصطناعي أصبح ضرورة للشركات الحديثة.",
-"استخدام الذكاء الاصطناعي يحسن من صورة العلامة التجارية.",
-"الذكاء الاصطناعي يقلل من الأخطاء في الحملات التسويقية.",
-"الذكاء الاصطناعي يساعد في تحسين إدارة وسائل التواصل الاجتماعي.",
-"الإعلانات المخصصة بالذكاء الاصطناعي أكثر نجاحاً.",
-"الذكاء الاصطناعي يرفع من معدل التحويل في التسويق الرقمي.",
-"الذكاء الاصطناعي يساهم في زيادة الأرباح للشركات.",
-"الذكاء الاصطناعي يسهل تحليل المنافسين في السوق.",
-"الذكاء الاصطناعي يحسن تجربة التسوق الإلكتروني.",
-"الاعتماد على الذكاء الاصطناعي يقلل الحاجة للعنصر البشري.",
-"مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
+const questions = [
+  "تؤثر أدوات الذكاء الاصطناعي بشكل إيجابي على الحملات التسويقية الرقمية.",
+  "يساعد الذكاء الاصطناعي في فهم سلوك العملاء بشكل أدق.",
+  "تحليل البيانات باستخدام الذكاء الاصطناعي يزيد من فعالية التسويق.",
+  "الإعلانات المولدة بالذكاء الاصطناعي أكثر جذباً من التقليدية.",
+  "الثقة بالإعلانات الرقمية تعتمد على وجود الذكاء الاصطناعي فيها.",
+  "الذكاء الاصطناعي يقلل من تكلفة الحملات التسويقية.",
+  "يساعد الذكاء الاصطناعي في استهداف الجمهور المناسب بدقة.",
+  "تستخدم الشركات الكبرى الذكاء الاصطناعي بشكل واسع في التسويق.",
+  "الذكاء الاصطناعي يحسن من تجربة المستخدم مع العلامة التجارية.",
+  "الذكاء الاصطناعي يزيد من سرعة اتخاذ القرارات التسويقية.",
+  "الذكاء الاصطناعي يعزز ولاء العملاء للعلامة التجارية.",
+  "التسويق بالذكاء الاصطناعي أكثر فاعلية من التسويق التقليدي.",
+  "أدوات الذكاء الاصطناعي تساعد في إنشاء محتوى إعلاني أفضل.",
+  "الذكاء الاصطناعي يساعد في توقع اتجاهات السوق المستقبلية.",
+  "الاعتماد على الذكاء الاصطناعي أصبح ضرورة للشركات الحديثة.",
+  "استخدام الذكاء الاصطناعي يحسن من صورة العلامة التجارية.",
+  "الذكاء الاصطناعي يقلل من الأخطاء في الحملات التسويقية.",
+  "الذكاء الاصطناعي يساعد في تحسين إدارة وسائل التواصل الاجتماعي.",
+  "الإعلانات المخصصة بالذكاء الاصطناعي أكثر نجاحاً.",
+  "الذكاء الاصطناعي يرفع من معدل التحويل في التسويق الرقمي.",
+  "الذكاء الاصطناعي يساهم في زيادة الأرباح للشركات.",
+  "الذكاء الاصطناعي يسهل تحليل المنافسين في السوق.",
+  "الذكاء الاصطناعي يحسن تجربة التسوق الإلكتروني.",
+  "الاعتماد على الذكاء الاصطناعي يقلل الحاجة للعنصر البشري.",
+  "مستقبل التسويق يعتمد بشكل كبير على الذكاء الاصطناعي."
 ];
 
 window.onload = () => {
@@ -187,70 +188,70 @@ window.onload = () => {
 };
 
 function askQuestion() {
-
-  if (locked) return;
-  locked = true;
-
   if (step >= questions.length) {
     finish();
-    locked = false;
     return;
   }
 
   let chat = document.getElementById("chat");
 
-  let q = document.createElement("div");
-  q.className = "bot";
-  q.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
+  // إنشاء وعاء السؤال
+  let qDiv = document.createElement("div");
+  qDiv.className = "bot";
+  qDiv.innerHTML = `<strong>السؤال ${step + 1}:</strong><br>${questions[step]}`;
+  
+  // إنشاء وعاء الأزرار
+  let btnsDiv = document.createElement("div");
+  btnsDiv.className = "buttons";
+  btnsDiv.id = "group-" + step;
 
-  let btns = document.createElement("div");
-  btns.className = "buttons";
-
-  btns.innerHTML = `
-    <button onclick="answer(3, this)" disabled>موافق</button>
-    <button onclick="answer(2, this)" disabled>محايد</button>
-    <button onclick="answer(1, this)" disabled>غير موافق</button>
+  btnsDiv.innerHTML = `
+    <button onclick="handleAnswer(3, this)">موافق</button>
+    <button onclick="handleAnswer(2, this)">محايد</button>
+    <button onclick="handleAnswer(1, this)">غير موافق</button>
   `;
 
-  chat.appendChild(q);
-  chat.appendChild(btns);
+  // تعطيل مؤقت لمنع النقرات العشوائية أثناء الظهور
+  btnsDiv.querySelectorAll("button").forEach(b => b.disabled = true);
+
+  chat.appendChild(qDiv);
+  chat.appendChild(btnsDiv);
   chat.scrollTop = chat.scrollHeight;
 
   setTimeout(() => {
-    btns.querySelectorAll("button").forEach(b => b.disabled = false);
-    locked = false;
-  }, 300);
+    btnsDiv.querySelectorAll("button").forEach(b => b.disabled = false);
+    isProcessing = false;
+  }, 400);
 }
 
-function answer(value, btn) {
-
+function handleAnswer(value, btn) {
+  if (isProcessing) return; // حماية ضد النقر السريع جداً
+  
   let container = btn.parentElement;
+  if (container.classList.contains("done")) return;
+  
+  isProcessing = true;
+  container.classList.add("done");
 
-  if (container.dataset.locked === "1") return;
-  container.dataset.locked = "1";
-
+  // تمييز الزر المختار وتعطيل البقية
   container.querySelectorAll("button").forEach(b => {
     b.disabled = true;
     b.classList.remove("selected");
   });
-
   btn.classList.add("selected");
 
-  // 🔥 ربط مباشر بدون اعتماد على step وقت التخزين
-  let questionText = container.previousElementSibling.innerText
-    .replace(/^السؤال \d+:/, "")
-    .trim();
-
+  // تخزين الإجابة
   answers.push({
-    question: questionText,
+    question: questions[step],
     answer: value
   });
 
   step++;
 
+  // الانتقال للسؤال التالي بعد تأخير بسيط
   setTimeout(() => {
     askQuestion();
-  }, 300);
+  }, 500);
 }
 
 function finish() {
@@ -258,29 +259,27 @@ function finish() {
   sent = true;
 
   let chat = document.getElementById("chat");
-
   let loadingMsg = document.createElement("div");
   loadingMsg.className = "bot";
   loadingMsg.innerText = "جاري حفظ إجاباتك... ⏳";
   chat.appendChild(loadingMsg);
+  chat.scrollTop = chat.scrollHeight;
 
+  // إرسال البيانات إلى Google Script الخاص بك
   fetch("https://script.google.com/macros/s/AKfycbwU3LacCTZUAW80wuFxDTofscMRn3bo8OegKb-FG2LEPHCVwauh-s_2mGM2eEU4rYZohg/exec", {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({ responses: answers })
   }).then(() => {
-
     loadingMsg.remove();
-
-    let msg = document.createElement("div");
-    msg.className = "bot";
-    msg.innerHTML = `
-      <strong>شكراً لمشاركتك 🙏</strong><br><br>
-      تم تسجيل إجاباتك بنجاح 🌟
-    `;
-
-    chat.appendChild(msg);
+    let finalMsg = document.createElement("div");
+    finalMsg.className = "bot";
+    finalMsg.innerHTML = `<strong>شكراً لمشاركتك 🙏</strong><br><br>تم تسجيل إجاباتك بنجاح 🌟`;
+    chat.appendChild(finalMsg);
     chat.scrollTop = chat.scrollHeight;
+  }).catch(err => {
+    loadingMsg.innerText = "حدث خطأ أثناء الحفظ، يرجى المحاولة لاحقاً.";
+    console.error(err);
   });
 }
 </script>
