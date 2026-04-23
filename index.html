@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- مهم جداً للموبايل -->
+<!-- 🔥 مهم جداً للموبايل -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
@@ -11,19 +11,20 @@
 
 <style>
 
-/* 🌐 الصفحة كاملة مرنة */
 body {
   margin: 0;
   font-family: 'Cairo', sans-serif;
   color: white;
   background: radial-gradient(circle at top, #0f0c29, #1a1a40, #000);
+
+  /* 🔥 إصلاح الموبايل */
   min-height: 100vh;
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ⭐ خلفية نجوم */
 body::before {
   content: "";
   position: fixed;
@@ -41,7 +42,7 @@ body::before {
   to { transform: translateY(-500px); }
 }
 
-/* 📱 الحاوية متجاوبة */
+/* 🔥 أهم تعديل هنا */
 .chat-container {
   width: 95%;
   max-width: 600px;
@@ -54,10 +55,9 @@ body::before {
   flex-direction: column;
 }
 
-/* 🧾 العنوان */
 .title-box {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .title-box h1 {
@@ -80,27 +80,24 @@ body::before {
   background: linear-gradient(to right, transparent, #00e5ff, transparent);
 }
 
-/* 💬 الرسائل */
 .messages {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
 }
 
-/* 🤖 الرسائل */
 .bot {
   background: rgba(255,255,255,0.08);
   padding: 12px;
   border-radius: 15px;
-  margin: 6px 0;
+  margin: 6px;
 }
 
-/* 🔘 الأزرار */
 .buttons {
   display: flex;
   gap: 10px;
-  margin: 10px 0;
-  flex-wrap: wrap;
+  margin: 12px 6px;
+  flex-wrap: wrap; /* 🔥 مهم للموبايل */
 }
 
 .buttons button {
@@ -119,6 +116,7 @@ body::before {
 .buttons button:hover {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
+  box-shadow: 0 0 10px #00e5ff;
   transform: scale(1.05);
 }
 
@@ -127,6 +125,11 @@ body::before {
   color: white;
   box-shadow: 0 0 15px #00e5ff;
   transform: scale(1.08);
+}
+
+.buttons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 </style>
@@ -138,7 +141,7 @@ body::before {
 
 <div class="title-box">
   <h1>AI MARKETING ANALYZER</h1>
-  <p>تحليل تأثير الذكاء الاصطناعي على العلامات التجارية الرقمية</p>
+  <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
   <div class="line"></div>
 </div>
 
@@ -214,8 +217,12 @@ function askQuestion() {
 
 function answer(value, btn) {
 
-  let buttons = btn.parentElement.querySelectorAll("button");
-  buttons.forEach(b => b.classList.remove("selected"));
+  let container = btn.parentElement;
+
+  if (container.dataset.locked === "1") return;
+  container.dataset.locked = "1";
+
+  container.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
 
   btn.classList.add("selected");
 
@@ -224,7 +231,7 @@ function answer(value, btn) {
   setTimeout(() => {
     step++;
     askQuestion();
-  }, 200);
+  }, 250);
 }
 
 function finish() {
@@ -241,7 +248,11 @@ function finish() {
 
   let msg = document.createElement("div");
   msg.className = "bot";
-  msg.innerText = "تم إرسال الإجابات بنجاح 👍";
+
+  msg.innerHTML = `
+    <strong>شكراً لمشاركتك 🙏</strong><br><br>
+    تم تسجيل إجاباتك بنجاح وساهمت في نجاح الدراسة 🌟
+  `;
 
   chat.appendChild(msg);
 }
