@@ -123,6 +123,7 @@ body::before {
     <p>تحليل تأثير التسويق بالذكاء الاصطناعي على العلامات التجارية الرقمية</p>
     <div class="line"></div>
   </div>
+
   <div id="chat" class="messages"></div>
 </div>
 
@@ -164,6 +165,10 @@ function askQuestion() {
 
   let q = document.createElement("div");
   q.className = "bot";
+
+  // 🔥 تخزين رقم السؤال داخل العنصر نفسه (حل المشكلة النهائي)
+  q.dataset.index = step;
+
   q.innerHTML = "<strong>السؤال " + (step + 1) + ":</strong><br>" + questions[step];
 
   let btns = document.createElement("div");
@@ -184,19 +189,26 @@ function answer(value, btn) {
   if (locked) return;
   locked = true;
 
-  const current = step;
-  answers[current] = value;
-
   let container = btn.parentElement;
+  let questionBox = container.previousElementSibling;
+
+  // 🔥 أخذ رقم السؤال الحقيقي من العنصر نفسه
+  const index = Number(questionBox.dataset.index);
+
+  answers[index] = value;
+
   container.querySelectorAll("button").forEach(b => b.disabled = true);
   btn.classList.add("selected");
 
-  step = current + 1;
+  // 🔥 حماية من أي تداخل
+  if (step <= index) {
+    step = index + 1;
+  }
 
   setTimeout(() => {
     locked = false;
     askQuestion();
-  }, 200);
+  }, 120);
 }
 
 function finish() {
