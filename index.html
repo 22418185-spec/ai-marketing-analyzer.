@@ -116,21 +116,11 @@ body::before {
 .buttons button:hover:not(:disabled) {
   background: linear-gradient(135deg, #00e5ff, #0077ff);
   color: white;
-  box-shadow: 0 0 10px #00e5ff;
-  transform: scale(1.05);
 }
 
 .buttons button.selected {
   background: linear-gradient(135deg, #00e5ff, #0077ff) !important;
   color: white !important;
-  box-shadow: 0 0 15px #00e5ff;
-  transform: scale(1.08);
-  opacity: 1 !important;
-}
-
-.buttons button:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 </style>
 </head>
@@ -186,9 +176,9 @@ function askQuestion() {
   btns.className = "buttons";
 
   btns.innerHTML = `
-    <button onclick="answer(3, this)">موافق</button>
-    <button onclick="answer(2, this)">محايد</button>
-    <button onclick="answer(1, this)">غير موافق</button>
+    <button onclick="answer(3, ${step}, this)">موافق</button>
+    <button onclick="answer(2, ${step}, this)">محايد</button>
+    <button onclick="answer(1, ${step}, this)">غير موافق</button>
   `;
 
   chat.appendChild(q);
@@ -196,7 +186,7 @@ function askQuestion() {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function answer(value, btn) {
+function answer(value, index, btn) {
 
   let container = btn.parentElement;
 
@@ -210,10 +200,12 @@ function answer(value, btn) {
 
   btn.classList.add("selected");
 
-  // 🔥 FIX الحقيقي للمشكلة
-  let currentIndex = step;
-  answers[currentIndex] = value;
-  step = currentIndex + 1;
+  // 🔥 FIX فقط هنا (بدون تغيير باقي الكود)
+  answers[index] = value;
+
+  if (index === step) {
+    step++;
+  }
 
   setTimeout(() => {
     askQuestion();
@@ -221,6 +213,18 @@ function answer(value, btn) {
 }
 
 function finish() {
+
+  // 🔥 Google Sheets (إضافة فقط)
+  fetch("https://script.google.com/macros/s/AKfycbzpvG-uaev_NUwvCLEvYcMTTFuL8JM5eq6gIyOPIbIcedUFWjqbg2IcPPvvRYg2vqP1/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      answers: answers
+    })
+  });
 
   let chat = document.getElementById("chat");
 
